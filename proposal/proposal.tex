@@ -1,0 +1,67 @@
+\documentclass{article}
+
+\usepackage[margin=0.8in]{geometry}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+{\huge Systems and Networking Capstone Project}
+
+{\large Analyzing scalability of IRC command and control network}
+\end{center} 
+
+\section*{Members}
+\begin{itemize}
+\item Kevin Malachowski (kchowski@vt.edu)
+\item Alex Shipley (alexs91@vt.edu)
+\item Reese Moore (ram@vt.edu)
+\item Rishi Ishairzay (windowasher@gmail.com)
+\end{itemize}
+
+\section*{Problem Statement}
+
+Rackspace needs to be able to reliably control a large number of geographically
+distributed compute nodes.
+
+\section*{Potential Solutions}
+\begin{itemize}
+\item Use RabbitMQ\footnote{\texttt http://www.rabbitmq.com/} to send messages
+between a ``master'' server and its ``slaves,'' delegating reliability of commands
+being executed to the master.
+\item IRC command and control network, where every node subscribes to specific
+channels and executes commands sent to those channels.
+\end{itemize}
+
+\noindent After talking to Paul Voccio of Rackspace, he suggested that we use the straight
+IRC solution. Gabe Westmass agreed for now, but mentioned that we may need to
+move to a hybrid RabbitMQ-IRC solution to help with scalability.
+
+\section*{Objectives}
+\begin{enumerate}
+\item Reliability of delivery and execution (correctness)
+\item Scalability
+\item Speed
+\end{enumerate}
+
+\section*{Timeline}
+\begin{itemize}
+\item Write Bot monitoring software for VMs
+\item Set up Rackspace machines
+    \begin{itemize}
+    \item Install simple IRC servers on two of the test machines (so we can test
+    linking them together in a network)
+    \item Install our Bot software on the remaining nodes
+    \end{itemize}
+\item Develop method for scalability testing
+    \begin{itemize}
+    \item Possible solutions:
+        \begin{itemize}
+        \item Run multiple bots on each VM
+        \end{itemize}
+    \end{itemize}
+\item Report on our findings regarding the scalability of our solution.
+\end{itemize}
+
+\end{document}
