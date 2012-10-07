@@ -1,0 +1,3 @@
+[submodule "pyhole"]
+	path = pyhole
+	url = git://github.com/jk0/pyhole.git
