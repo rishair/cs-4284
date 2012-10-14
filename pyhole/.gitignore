@@ -3,7 +3,6 @@
 *.swp
 *.log
 *.xml
-*.conf
 .DS_Store
 .coverage
 docs/_build
