@@ -10,17 +10,17 @@ do
 #cat '.ssh/id_rsa.pub' | ssh  $USR@$host 'cat - >> ~/.ssh/authorized_keys2'
 
 # For installing git
-#ssh -t $USR@$host 'mkdir .ssh; touch .ssh/authorized_keys2; sudo apt-get update; sudo apt-get install git-core;'
+#ssh -t $USR@$host 'mkdir .ssh; touch .ssh/authorized_keys2; sudo apt-get -y update; sudo apt-get install git-core;' &
 
 # For cloning project, and installing pyhole dependencies
-#ssh -t $USR@$host 'git clone "https://github.com/rishair/cs-4284.git"; sudo apt-get -y install python python-pip python-dev build-essential; cd cs-4284/pyhole; sudo pip install -r tools/pip-requires; ./tools/run_pyhole.sh;'
+#ssh -t $USR@$host 'git clone "https://github.com/rishair/cs-4284.git"; sudo apt-get -y install python python-pip python-dev build-essential; cd cs-4284/pyhole; sudo pip install -r tools/pip-requires; ./tools/run_pyhole.sh;' &
 
 # For updating project.
-#ssh -t $USR@$host 'cd cs-4284; git pull;'
+#ssh -t $USR@$host 'cd cs-4284; git pull;' &
 
 # For running bot. Note this puts each session in background. You can run this multiple times to put multiple bots on a machine.
 #ssh -t $USR@$host 'cd cs-4284/pyhole; cp configs/custom.conf ~/.pyhole/pyhole.conf; ./tools/run_pyhole.sh' &
 
 # Kill bots.
-#ssh -t $USR@$host 'pkill python'
+#ssh -t $USR@$host 'pkill python' &
 done
