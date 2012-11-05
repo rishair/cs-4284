@@ -34,6 +34,6 @@ class Stats(plugin.Plugin):
             ipv4 = s.getsockname()[0]
             s.close()
 
-        self.irc.reply("Hostname: %s" % hostname)
-        self.irc.reply("IPv4: %s" % ipv4)
+        self.irc.privmsg("#reply", "Hostname: %s" % hostname)
+        self.irc.privmsg("#reply", "IPv4: %s" % ipv4)
 
