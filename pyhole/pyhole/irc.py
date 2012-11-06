@@ -179,8 +179,8 @@ class IRC(irclib.SimpleIRCClient):
             else:
                 self.log.info("<%s> %s" % (self.nick, line))
 
-    def reply(self, msg):
-        """Send a privmsg."""
+    def normal_reply(self, msg):
+        """Send a privmsg reply with normal semantics."""
         msg = self._mangle_msg(msg)
         for line in msg:
             if self.addressed:
@@ -190,6 +190,24 @@ class IRC(irclib.SimpleIRCClient):
                         source, line))
             else:
                 self.connection.privmsg(self.target, line)
+                if irclib.is_channel(self.target):
+                    self.log.info("-%s- <%s> %s" % (self.target, self.nick,
+                            line))
+                else:
+                    self.log.info("<%s> %s" % (self.nick, line))
+
+    def reply(self, msg):
+        """Send a privmsg. If the generating event was in channel #test, respond
+        in ##test."""
+        msg = self._mangle_msg(msg)
+        for line in msg:
+            if self.addressed:
+                source = self.source.split("!")[0]
+                self.connection.privmsg(self.target, "%s: %s" % (source, line))
+                self.log.info("-%s- <%s> %s: %s" % (self.target, self.nick,
+                        source, line))
+            else:
+                self.connection.privmsg('#' + self.target, line)
                 if irclib.is_channel(self.target):
                     self.log.info("-%s- <%s> %s" % (self.target, self.nick,
                             line))
