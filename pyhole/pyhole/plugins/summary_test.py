@@ -17,6 +17,6 @@ class SummaryTest(plugin.Plugin):
     def summaryTest(self, params=None, **kwargs):
         """Test out the client-side summary using non-local sending"""
         
-        # Simulate actual data to aggregate, send to the #reply channel
-        self.irc.reply("(sum, %s): This is test data: %s" % (hash(kwargs["full_message"] + self.irc.source), random.randint(0,4)))
+        # Simulate actual data to aggregate, send to the reply channel
+        self.irc.reply("sum;%s;%s" % (hash(kwargs["full_message"] + self.irc.source), random.randint(0,4)))
 
