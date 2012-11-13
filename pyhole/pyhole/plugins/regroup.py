@@ -7,10 +7,8 @@ from pyhole import irc
 from pyhole import plugin
 from pyhole import utils
 
-
-
-class SummaryTest(plugin.Plugin):
-    """Tests the client-side summary"""
+class Regroup(plugin.Plugin):
+    """Deals with bots adding and removing themselves from channels"""
 
     @plugin.hook_add_command("ungroup")
     def ungroup(self, params=None, **kwargs):
