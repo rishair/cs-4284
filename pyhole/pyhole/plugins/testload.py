@@ -21,4 +21,4 @@ class TestLoad(plugin.Plugin):
             self.irc.reply(data)
             time.sleep(float(p[2]))
         
-        self.irc.reply("load;%s;done" % (hash(kwargs["full_message"] + self.irc.source))
+        self.irc.reply("load;%s;done" % (hash(kwargs["full_message"] + self.irc.source)))

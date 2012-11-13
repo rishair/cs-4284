@@ -11,4 +11,4 @@ class Version(plugin.Plugin):
         """Spit out version"""
         
         # Simulate actual data to aggregate, send to the reply channel
-        self.irc.reply("v;%s;1" % (hash(kwargs["full_message"] + self.irc.source))
+        self.irc.reply("v;%s;1" % (hash(kwargs["full_message"] + self.irc.source)))
