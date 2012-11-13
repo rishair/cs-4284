@@ -60,7 +60,9 @@ class IRC(irclib.SimpleIRCClient):
         self.username = network_config.get("username", default=None)
         self.identify_password = network_config.get("identify_password",
                 default=None)
-        self.channels = network_config.get("channels", type="list")
+        self.default_channels = network_config.get("channels", type="list")
+        # make sure to copy the list
+        self.channels = list(self.default_channels)
 
         self.load_plugins()
 
