@@ -34,7 +34,7 @@ class Update(plugin.Plugin):
         # In addition, if there's a way to do this within irclib feel free to change it.
         #    I don't feel like looking through 50kb to find something that looks remotely
         #    like it will do this
-        copy = list(self.channels)
+        copy = list(self.irc.channels)
         for ch in copy:
             self.irc.part_channel(ch)
         
