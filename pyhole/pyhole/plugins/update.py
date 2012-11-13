@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""Pyhole Search Plugin"""
+"""Updater plugin"""
 
 from pyhole import plugin
 from pyhole import utils
@@ -27,6 +27,17 @@ class Update(plugin.Plugin):
     @utils.spawn
     def update(self, params=None, **kwargs):
         """Update bot."""
+        
+        # This is innefficient for large lists but the overhead is small for smaller lists.
+        #    if it is forseen that bots will be in 20+ channels we'll have to change this.
+        
+        # In addition, if there's a way to do this within irclib feel free to change it.
+        #    I don't feel like looking through 50kb to find something that looks remotely
+        #    like it will do this
+        copy = list(self.channels)
+        for ch in copy:
+            self.irc.part_channel(ch)
+        
         wd = os.getcwd()
         cmd = wd + "/tools/update.sh"
         subprocess.call([cmd])
