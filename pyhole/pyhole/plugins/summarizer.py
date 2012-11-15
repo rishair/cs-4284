@@ -20,7 +20,8 @@ class UserManager:
 	def add_user_hash(self, nick, h):
 		self.setup_user(nick)
 		self._users[nick][0] = h
-		self._users[nick][1].append(h)
+		if h not in self._users[nick][1]:
+			self._users[nick][1].append(h)
 
 	def user_hash(self, nick):
 		self.setup_user(nick)
@@ -66,7 +67,7 @@ class Summarizer(plugin.Plugin):
 						break
 				if auto_channel != None: channel = "#" + auto_channel
 
-		if channel[0:3] == "###":
+		if channel[0:2] == "##":
 			split = message.split(";", 1)
 			if len(split) > 1:
 				# Message from a bot
@@ -80,6 +81,10 @@ class Summarizer(plugin.Plugin):
 
 			if message == "jobs":
 				self.irc.normal_reply(", ".join(self._users.user_hashes(nick)))
+			elif message.startswith("setjob"):
+				md5 = message.split(" ", 1)[1]
+				self.irc.normal_reply("Job set to %s" % md5)
+				self._users.add_user_hash(nick, md5)
 			elif message[0] == ".":
 				md5 = self.irc.generate_hash(nick, message)
 				self._users.add_user_hash(nick, md5)
