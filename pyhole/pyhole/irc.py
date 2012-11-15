@@ -200,26 +200,15 @@ class IRC(irclib.SimpleIRCClient):
                 else:
                     self.log.info("<%s> %s" % (self.nick, line))
 
-    def send_to_bots(self, hash, msg):
-        self.connection.privmsg("##" + self.target.strip("#"), "%s $%s$" % (msg, hash))
+    def send_to_bots(self, channel, hash, msg):
+        self.connection.privmsg("#" + channel.strip("#"), "%s $%s$" % (msg, hash))
 
     def reply(self, hash, msg):
         """Send a privmsg. If the generating event was in channel #test, respond
         in ##test."""
         msg = hash + ";" + msg
-        channel = '###' + self.target.strip("#")
-        if self.addressed:
-            source = self.source.split("!")[0]
-            self.connection.privmsg(channel, "%s: %s" % (source, msg))
-            self.log.info("-%s- <%s> %s: %s" % (self.target, self.nick,
-                    source, msg))
-        else:
-            self.connection.privmsg(channel, msg)
-            if irclib.is_channel(self.target):
-                self.log.info("-%s- <%s> %s" % (self.target, self.nick,
-                        msg))
-            else:
-                self.log.info("<%s> %s" % (self.nick, msg))
+        channel = '##' + self.target.strip("#")
+        self.connection.privmsg(channel, msg)
 
     def privmsg(self, target, msg):
         """Send a privmsg."""

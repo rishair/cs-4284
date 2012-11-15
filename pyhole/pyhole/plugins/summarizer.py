@@ -51,6 +51,20 @@ class Summarizer(plugin.Plugin):
 		channel = self.irc.target
 		nick = self.irc.source
 		message = kwargs["full_message"]
+		private = kwargs["private"]
+
+		if private:
+			if message[0] == "#":
+				channel = "#" + message.split(" ", 1)[0].strip("#")
+				message = message.split(" ", 1)[1]
+			else:
+				auto_channel = None
+				for c in self.irc.channels:
+					if auto_channel is None: auto_channel = c.strip("#")
+					if c.strip("#") != auto_channel:
+						auto_channel = None
+						break
+				if auto_channel != None: channel = "#" + auto_channel
 
 		if channel[0:3] == "###":
 			split = message.split(";", 1)
@@ -70,7 +84,7 @@ class Summarizer(plugin.Plugin):
 				md5 = self.irc.generate_hash(nick, message)
 				self._users.add_user_hash(nick, md5)
 				self.irc.normal_reply("Processing job %s" % md5)
-				self.irc.send_to_bots(md5, message)
+				self.irc.send_to_bots(channel, md5, message)
 			else:
 				md5 = self._users.user_hash(nick)
 				self.irc.normal_reply("Showing job %s" % md5)
