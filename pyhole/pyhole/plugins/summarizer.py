@@ -52,7 +52,7 @@ class Summarizer(plugin.Plugin):
 		nick = self.irc.source
 		message = kwargs["full_message"]
 
-		if channel[0:2] == "##":
+		if channel[0:3] == "###":
 			split = message.split(";", 1)
 			if len(split) > 1:
 				# Message from a bot
@@ -70,6 +70,7 @@ class Summarizer(plugin.Plugin):
 				md5 = self.irc.generate_hash(nick, message)
 				self._users.add_user_hash(nick, md5)
 				self.irc.normal_reply("Processing job %s" % md5)
+				self.irc.send_to_bots(md5, message)
 			else:
 				md5 = self._users.user_hash(nick)
 				self.irc.normal_reply("Showing job %s" % md5)

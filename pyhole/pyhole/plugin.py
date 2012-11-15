@@ -20,6 +20,7 @@ import sys
 
 import log
 import utils
+import re
 
 
 LOG = log.get_logger()
@@ -109,6 +110,14 @@ class Plugin(object):
         self.irc = irc
         self.name = self.__class__.__name__
 
+    def extract_command(self, kwargs):
+        print kwargs["full_message"] + "---"
+        match = re.search("\$([ -~]+)\$", kwargs["full_message"])
+        hash = ""
+        if match:
+            hash = match.group(1)
+        message = re.sub("\$([ -~]+)\$", "", kwargs["full_message"])
+        return (hash, message)
 
 def _init_plugins(*args, **kwargs):
     """Create instances of the plugin classes and create a cache

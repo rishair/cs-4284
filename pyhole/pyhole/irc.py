@@ -156,7 +156,7 @@ class IRC(irclib.SimpleIRCClient):
         self.run_msg_regexp_hooks(message, private)
 
     def generate_hash(self, nick, msg):
-        return hashlib.md5(msg + nick).hexdigest()[0:6]
+        return hashlib.md5(str(time.time()) + msg + nick).hexdigest()[0:6]
 
     def _cleanse_msg(self, msg):
         """Prepare the message for sending."""
@@ -200,38 +200,26 @@ class IRC(irclib.SimpleIRCClient):
                 else:
                     self.log.info("<%s> %s" % (self.nick, line))
 
-    def bot_reply(self, reply, msg):
-        encoded_msg = self.generate_hash(self.source, msg) + ";" + reply
-        if self.addressed:
-            source = self.source.split("!")[0]
-            self.connection.privmsg(self.target, "%s: %s" % (source, encoded_msg))
-            self.log.info("-%s- <%s> %s: %s" % (self.target, self.nick,
-                    source, encoded_msg))
-        else:
-            self.connection.privmsg("#" + self.target, encoded_msg)
-            if irclib.is_channel(self.target):
-                self.log.info("-%s- <%s> %s" % (self.target, self.nick,
-                        encoded_msg))
-            else:
-                self.log.info("<%s> %s" % (self.nick, encoded_msg))
+    def send_to_bots(self, hash, msg):
+        self.connection.privmsg("##" + self.target.strip("#"), "%s $%s$" % (msg, hash))
 
-    def reply(self, msg):
+    def reply(self, hash, msg):
         """Send a privmsg. If the generating event was in channel #test, respond
         in ##test."""
-        msg = self._mangle_msg(msg)
-        for line in msg:
-            if self.addressed:
-                source = self.source.split("!")[0]
-                self.connection.privmsg(self.target, "%s: %s" % (source, line))
-                self.log.info("-%s- <%s> %s: %s" % (self.target, self.nick,
-                        source, line))
+        msg = hash + ";" + msg
+        channel = '###' + self.target.strip("#")
+        if self.addressed:
+            source = self.source.split("!")[0]
+            self.connection.privmsg(channel, "%s: %s" % (source, msg))
+            self.log.info("-%s- <%s> %s: %s" % (self.target, self.nick,
+                    source, msg))
+        else:
+            self.connection.privmsg(channel, msg)
+            if irclib.is_channel(self.target):
+                self.log.info("-%s- <%s> %s" % (self.target, self.nick,
+                        msg))
             else:
-                self.connection.privmsg('#' + self.target, line)
-                if irclib.is_channel(self.target):
-                    self.log.info("-%s- <%s> %s" % (self.target, self.nick,
-                            line))
-                else:
-                    self.log.info("<%s> %s" % (self.nick, line))
+                self.log.info("<%s> %s" % (self.nick, msg))
 
     def privmsg(self, target, msg):
         """Send a privmsg."""

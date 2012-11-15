@@ -15,6 +15,7 @@ class BotCommands(plugin.Plugin):
 
     @plugin.hook_add_command("bot")
     def bot(self, params=None, **kwargs):
-        """Test out the client-side summary using non-local sending"""
-        self.irc.bot_reply("on it", kwargs["full_message"])
+        """Test out the server-side summary using non-local sending"""
+        (hash, message) = self.extract_command(kwargs)
+        self.irc.reply(hash, str(random.randint(0, 10)))
 
