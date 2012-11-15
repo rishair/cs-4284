@@ -18,6 +18,9 @@ do
 	elif [ $1 == "update" ]; then
 		# For updating project.
 		ssh -t $USR@$host 'cd cs-4284; git pull;' &
+	elif [ $1 == "run_summarizer" ]; then
+		# For running bot. Note this puts each session in background. You can run this multiple times to put multiple bots on a machine.
+		ssh -t $USR@$host 'cd cs-4284/pyhole; cp configs/summarizer.conf ~/.pyhole/pyhole.conf; ./tools/run_pyhole.sh' &
 	elif [ $1 == "run" ]; then
 		# For running bot. Note this puts each session in background. You can run this multiple times to put multiple bots on a machine.
 		ssh -t $USR@$host 'cd cs-4284/pyhole; cp configs/custom.conf ~/.pyhole/pyhole.conf; ./tools/run_pyhole.sh' &
