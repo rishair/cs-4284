@@ -26,6 +26,7 @@ import log
 import plugin
 import utils
 import version
+import hashlib
 
 
 LOG = log.get_logger()
@@ -154,7 +155,10 @@ class IRC(irclib.SimpleIRCClient):
         self.run_keyword_hooks(message, private)
         self.run_msg_regexp_hooks(message, private)
 
-    def _mangle_msg(self, msg):
+    def generate_hash(self, nick, msg):
+        return hashlib.md5(msg + nick).hexdigest()[0:6]
+
+    def _cleanse_msg(self, msg):
         """Prepare the message for sending."""
         if not hasattr(msg, "encode"):
             try:
@@ -162,13 +166,11 @@ class IRC(irclib.SimpleIRCClient):
             except Exception:
                 self.log.error("msg cannot be converted to string")
                 return
+        return msg.encode("utf-8")
 
-        msg = msg.encode("utf-8").split("\n")
-        # NOTE(jk0): 10 is completely arbitrary for now.
-        if len(msg) > 10:
-            msg = msg[0:8]
-            msg.append("...")
-
+    def _mangle_msg(self, msg):
+        """Prepare the message for sending."""
+        msg = self._cleanse_msg(msg).split("\n")
         return msg
 
     def notice(self, msg):
@@ -197,6 +199,21 @@ class IRC(irclib.SimpleIRCClient):
                             line))
                 else:
                     self.log.info("<%s> %s" % (self.nick, line))
+
+    def bot_reply(self, reply, msg):
+        encoded_msg = self.generate_hash(self.source, msg) + ";" + reply
+        if self.addressed:
+            source = self.source.split("!")[0]
+            self.connection.privmsg(self.target, "%s: %s" % (source, encoded_msg))
+            self.log.info("-%s- <%s> %s: %s" % (self.target, self.nick,
+                    source, encoded_msg))
+        else:
+            self.connection.privmsg("#" + self.target, encoded_msg)
+            if irclib.is_channel(self.target):
+                self.log.info("-%s- <%s> %s" % (self.target, self.nick,
+                        encoded_msg))
+            else:
+                self.log.info("<%s> %s" % (self.nick, encoded_msg))
 
     def reply(self, msg):
         """Send a privmsg. If the generating event was in channel #test, respond
