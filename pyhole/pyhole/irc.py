@@ -26,6 +26,7 @@ import log
 import plugin
 import utils
 import version
+
 import hashlib
 
 
@@ -158,7 +159,7 @@ class IRC(irclib.SimpleIRCClient):
     def generate_hash(self, nick, msg):
         return hashlib.md5(str(time.time()) + msg + nick).hexdigest()[0:6]
 
-    def _cleanse_msg(self, msg):
+    def _mangle_msg(self, msg):
         """Prepare the message for sending."""
         if not hasattr(msg, "encode"):
             try:
@@ -166,11 +167,17 @@ class IRC(irclib.SimpleIRCClient):
             except Exception:
                 self.log.error("msg cannot be converted to string")
                 return
-        return msg.encode("utf-8")
 
-    def _mangle_msg(self, msg):
-        """Prepare the message for sending."""
-        msg = self._cleanse_msg(msg).split("\n")
+        msg = msg.encode("utf-8").split("\n")
+
+        # Removing this because it arbitrarily truncates the length
+        # of messages to 10 lines
+        # 
+        # NOTE(jk0): 10 is completely arbitrary for now.
+        # if len(msg) > 10:
+            # msg = msg[0:8]
+            # msg.append("...")
+
         return msg
 
     def notice(self, msg):
@@ -183,7 +190,7 @@ class IRC(irclib.SimpleIRCClient):
             else:
                 self.log.info("<%s> %s" % (self.nick, line))
 
-    def reply(self, msg):
+    def normal_reply(self, msg):
         """Send a privmsg reply with normal semantics."""
         msg = self._mangle_msg(msg)
         for line in msg:
@@ -203,12 +210,28 @@ class IRC(irclib.SimpleIRCClient):
     def send_to_bots(self, channel, hash, msg):
         self.connection.privmsg("#" + channel.strip("#"), "%s $%s$" % (msg, hash))
 
-    def bot_reply(self, msg, hash=""):
+    def reply(self, msg, hash=""):
         """Send a privmsg. If the generating event was in channel #test, respond
         in ##test."""
-        msg = hash + ";" + msg
-        channel = '##' + self.target.strip("#")
-        self.connection.privmsg(channel, msg)
+        # Todo: We need a better way to generate a hash
+        # if hash == None:
+            # hash = self.generate_hash(self.source, self.source)
+        if len(hash) > 0:
+            hash = hash + ";"
+        msg = self._mangle_msg(msg)
+        for line in msg:
+            if self.addressed:
+                source = self.source.split("!")[0]
+                self.connection.privmsg(self.target, "%s: %s" % (source, line))
+                self.log.info("-%s- <%s> %s: %s" % (self.target, self.nick,
+                        source, line))
+            else:
+                self.connection.privmsg('#' + self.target, hash + line)
+                if irclib.is_channel(self.target):
+                    self.log.info("-%s- <%s> %s" % (self.target, self.nick,
+                            line))
+                else:
+                    self.log.info("<%s> %s" % (self.nick, line))
 
     def privmsg(self, target, msg):
         """Send a privmsg."""
