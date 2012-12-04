@@ -203,7 +203,7 @@ class IRC(irclib.SimpleIRCClient):
     def send_to_bots(self, channel, hash, msg):
         self.connection.privmsg("#" + channel.strip("#"), "%s $%s$" % (msg, hash))
 
-    def reply(self, hash, msg):
+    def reply(self, msg, hash=""):
         """Send a privmsg. If the generating event was in channel #test, respond
         in ##test."""
         msg = hash + ";" + msg

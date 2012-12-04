@@ -16,8 +16,8 @@ class SummaryTest(plugin.Plugin):
     @plugin.hook_add_command("sum")
     def summaryTest(self, params=None, **kwargs):
         """Test out the client-side summary using non-local sending"""
-        
-        self.irc.bot_reply(str(random.randint(0, 4)), kwargs["full_message"])
+        (hash, message) = self.extract_command(kwargs)
+        self.irc.reply(str(random.randint(0, 4)))
         # Simulate actual data to aggregate, send to the reply channel
         # self.irc.reply("sum;%s;%s" % (hash(kwargs["full_message"] + self.irc.source), random.randint(0,4)))
 

@@ -117,7 +117,7 @@ class Plugin(object):
         if match:
             hash = match.group(1)
         message = re.sub("\$([ -~]+)\$", "", kwargs["full_message"])
-        return (hash, message)
+        return (message, hash)
 
 def _init_plugins(*args, **kwargs):
     """Create instances of the plugin classes and create a cache

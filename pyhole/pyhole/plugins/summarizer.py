@@ -50,7 +50,7 @@ class Summarizer(plugin.Plugin):
 	@plugin.hook_add_msg_regex(".")
 	def bot_command(self, params=None, **kwargs):
 		channel = self.irc.target
-		nick = self.irc.source
+		nick = self.irc.source.split("!")[0]
 		message = kwargs["full_message"]
 		private = kwargs["private"]
 
@@ -76,6 +76,8 @@ class Summarizer(plugin.Plugin):
 				self.summarizer(hash).add(nick, message)
 			else:
 				pass
+		elif channel[0:1] == "#" and not private:
+			self.irc.normal_reply("%s: PM me punk. I have everything you need." % nick)
 		else:
 			sums = self.summarizers()
 
