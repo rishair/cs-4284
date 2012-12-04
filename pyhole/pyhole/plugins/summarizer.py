@@ -77,7 +77,7 @@ class Summarizer(plugin.Plugin):
 			else:
 				pass
 		elif channel[0:1] == "#" and not private:
-			self.irc.normal_reply("%s: PM me punk. I have everything you need." % nick)
+			self.irc.normal_reply("%s: If you PM me the same command I might be able to help you summarize the results." % nick)
 		else:
 			sums = self.summarizers()
 

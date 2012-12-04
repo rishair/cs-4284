@@ -148,9 +148,19 @@ class IRC(irclib.SimpleIRCClient):
                         private=private, addressed=self.addressed,
                         full_message=message)
 
+    def extract_command(self, kwargs):
+        match = re.search("\$([ -~]+)\$", kwargs["full_message"])
+        hash = ""
+        if match:
+            hash = match.group(1)
+        message = re.sub("\$([ -~]+)\$", "", kwargs["full_message"])
+        return (message, hash)
+
     def poll_messages(self, message, private=False):
         """Watch for known commands."""
         self.addressed = False
+
+        (message, self.hash) = self.extract_command(message)
 
         self.run_command_hooks(message, private)
         self.run_keyword_hooks(message, private)
@@ -210,12 +220,13 @@ class IRC(irclib.SimpleIRCClient):
     def send_to_bots(self, channel, hash, msg):
         self.connection.privmsg("#" + channel.strip("#"), "%s $%s$" % (msg, hash))
 
-    def reply(self, msg, hash=""):
+    def reply(self, msg):
         """Send a privmsg. If the generating event was in channel #test, respond
         in ##test."""
         # Todo: We need a better way to generate a hash
         # if hash == None:
             # hash = self.generate_hash(self.source, self.source)
+        hash = self.hash
         if len(hash) > 0:
             hash = hash + ";"
         msg = self._mangle_msg(msg)
