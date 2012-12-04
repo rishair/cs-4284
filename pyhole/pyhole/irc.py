@@ -183,7 +183,7 @@ class IRC(irclib.SimpleIRCClient):
             else:
                 self.log.info("<%s> %s" % (self.nick, line))
 
-    def normal_reply(self, msg):
+    def reply(self, msg):
         """Send a privmsg reply with normal semantics."""
         msg = self._mangle_msg(msg)
         for line in msg:
@@ -203,7 +203,7 @@ class IRC(irclib.SimpleIRCClient):
     def send_to_bots(self, channel, hash, msg):
         self.connection.privmsg("#" + channel.strip("#"), "%s $%s$" % (msg, hash))
 
-    def reply(self, msg, hash=""):
+    def bot_reply(self, msg, hash=""):
         """Send a privmsg. If the generating event was in channel #test, respond
         in ##test."""
         msg = hash + ";" + msg
