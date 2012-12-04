@@ -148,12 +148,12 @@ class IRC(irclib.SimpleIRCClient):
                         private=private, addressed=self.addressed,
                         full_message=message)
 
-    def extract_command(self, kwargs):
-        match = re.search("\$([ -~]+)\$", kwargs["full_message"])
+    def extract_command(self, msg):
+        match = re.search("\$([ -~]+)\$", msg)
         hash = ""
         if match:
             hash = match.group(1)
-        message = re.sub("\$([ -~]+)\$", "", kwargs["full_message"])
+        message = re.sub("\$([ -~]+)\$", "", msg)
         return (message, hash)
 
     def poll_messages(self, message, private=False):
