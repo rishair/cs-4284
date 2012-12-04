@@ -17,5 +17,5 @@ class BotCommands(plugin.Plugin):
     def bot(self, params=None, **kwargs):
         """Test out the server-side summary using non-local sending"""
         (message, hash) = self.extract_command(kwargs)
-        self.irc.bot_reply(str(random.randint(0, 10)), hash)
+        self.irc.reply(str(random.randint(0, 10)), hash)
 
