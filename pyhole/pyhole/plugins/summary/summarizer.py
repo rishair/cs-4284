@@ -24,28 +24,30 @@ class GroupedSummarizer:
 class NumericalSummarizer:
   def __init__(self, match_string):
     subs = {
-      "%s": "[A-Za-z0-9]+",
-      "%n": "[0-9.]+"
+      "s": "\S+",
+      "n": "[0-9.]+"
     }
     self.hosts = []
     self.matches = []
     self.combiners = []
-    matches = re.findall("((([A-Za-z]+%)?[A-Za-z]+)?(%[A-Za-z]))", match_string)
+    matches = re.findall("(<([A-Za-z0-9._\\+:-]+)>|\s+)", match_string)
+    match_string = ""
     i = 1
     for match in matches:
-      t = match[0].split("%")
-      while len(t) < 3:
-        t.insert(0, "")
-      self.combiners.append(self.find_combiner(t[0], t[1], t[2]))
-      self.matches.append([])
-      i += 1
-
-    for key in subs.keys():
-      match_string = re.sub("([A-Za-z]*)%*([A-Za-z]*)" + key, "(%s)" % subs[key], match_string)
+      combiner = match[1]
+      if len(combiner) > 0:
+        # We're dealing with a <combiner>
+        args = combiner.split(":")
+        while len(args) < 3: args.append("") 
+        self.combiners.append(self.find_combiner(args[0], args[1], args[2]))
+        match_string += "(" + subs[args[0]] + ")"
+        self.matches.append([])
+      else:
+        match_string += "\s+"
 
     self.match_string = match_string
 
-  def find_combiner(self, name, combiner, type):
+  def find_combiner(self, type, combiner, name):
     if combiner == "concat":
       return ConcatCombiner(name, type)
     elif combiner == "avg":
