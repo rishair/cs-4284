@@ -68,9 +68,12 @@ class NumericalSummarizer:
       # items.append("Variable %d (%s) - %s" % (i+1, self.combiners[i].type, self.combiners[i].summary()))
       items.append("%s (%s) - %s" % (self.combiners[i].name, self.combiners[i].type, self.combiners[i].summary()))
       
+    interactive_list = InteractiveList(items)
+    interactive_list.show_numbers = False
+    interactive_list.show_pages = False
     return Menu(Prepender(
-        "%d total items" % len(self.hosts),
-        InteractiveList(items)))
+        "%d total entries" % len(self.hosts),
+        interactive_list))
 
 class Combiner:
   def __init__(self, name, type):

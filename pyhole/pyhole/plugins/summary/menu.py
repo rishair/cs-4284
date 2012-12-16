@@ -111,6 +111,8 @@ class InteractiveList (InteractiveItem):
     self.list = l
     self.cursor = 0
     self.perpage = 3
+    self.show_pages = True
+    self.show_numbers = True
 
   def find(self, query):
     ranked = RankedList()
@@ -146,10 +148,13 @@ class InteractiveList (InteractiveItem):
     # return "(page %d of %d)\n\n" % (self.cursor / self.perpage + 1, (len(self.list) - 1) / self.perpage + 1)
 
   def display(self):
-    display = self.page_display()
+    display = ""
+    if self.show_pages:
+      display += self.page_display()
     for i in self.current_range():
       item = self.list[i]
-      display += str(i + 1) + ". "
+      if self.show_numbers:
+        display += str(i + 1) + ". "
       if isinstance(item, InteractiveItem):
         display += item.display_short()
       else:

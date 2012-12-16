@@ -156,11 +156,31 @@ class IRC(irclib.SimpleIRCClient):
         message = re.sub("\$([ -~]+)\$", "", msg)
         return (message, hash)
 
+    def extract_targets(self, msg):
+        match = re.search("\[([ -~]+)\]", msg)
+        targets = None
+        if match:
+            targets = match.group(1).split(",")
+            for i in range(len(targets)):
+                targets[i] = targets[i].strip()
+
+        message = re.sub("[$([ -~]+)\]", "", msg)
+        return (message, targets)
+
     def poll_messages(self, message, private=False):
         """Watch for known commands."""
         self.addressed = False
 
         (message, self.hash) = self.extract_command(message)
+        (message, self.targets) = self.extract_targets(message)
+
+        if self.targets != None:
+            # Check if we're part of this batch of commands
+            if self.nick not in self.targets:
+                print "Nope from %s.\n" % self.nick
+                return
+
+
 
         self.run_command_hooks(message, private)
         self.run_keyword_hooks(message, private)
