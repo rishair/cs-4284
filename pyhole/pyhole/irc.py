@@ -46,6 +46,7 @@ class IRC(irclib.SimpleIRCClient):
         self.source = None
         self.target = None
         self.addressed = False
+        self.rank = -1
 
         self.admins = CONFIG.get("admins", type="list")
         self.command_prefix = CONFIG.get("command_prefix")
@@ -170,14 +171,18 @@ class IRC(irclib.SimpleIRCClient):
     def poll_messages(self, message, private=False):
         """Watch for known commands."""
         self.addressed = False
+        self.rank = -1
 
         (message, self.hash) = self.extract_command(message)
         (message, self.targets) = self.extract_targets(message)
 
         if self.targets != None:
             # Check if we're part of this batch of commands
-            if self.nick not in self.targets and not self.nick.startswith("botty"):
-                print "Nope from %s.\n" % self.nick
+            for i in range(len(self.targets)):
+                if self.nick == self.targets[i]:
+                    self.rank = i
+
+            if self.rank == -1 and not self.nick.startswith("botty"):
                 return
 
 

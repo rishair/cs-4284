@@ -18,3 +18,8 @@ class BotCommands(plugin.Plugin):
         """Test out the server-side summary using non-local sending"""
         self.irc.reply(str(random.randint(0, 10)))
 
+    @plugin.hook_add_command("rank")
+    def bot(self, params=None, **kwargs):
+        """Test out the server-side summary using non-local sending"""
+        self.irc.reply(str(self.irc.rank))
+
