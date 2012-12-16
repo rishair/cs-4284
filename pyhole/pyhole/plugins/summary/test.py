@@ -1,4 +1,4 @@
-
+import sys
 from summarizer import *
 from menu import *
 
@@ -10,3 +10,6 @@ summarizer.add("test", "hello 44")
 
 menu = summarizer.menu()
 print menu.display()
+
+
+print sys.modules
