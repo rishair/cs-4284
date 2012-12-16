@@ -135,7 +135,7 @@ class MinCombiner(Combiner):
     item = float(item)
     if self.min == None:
       self.min = item
-    else
+    else:
       self.min = min(item, self.min)
   def summary(self):
     return str(self.min)
@@ -148,7 +148,7 @@ class MaxCombiner(Combiner):
     item = float(item)
     if self.max == None:
       self.max = item
-    else
+    else:
       self.max = max(item, self.max)
   def summary(self):
     return str(self.max)
