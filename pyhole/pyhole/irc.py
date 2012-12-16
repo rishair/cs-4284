@@ -46,7 +46,7 @@ class IRC(irclib.SimpleIRCClient):
         self.source = None
         self.target = None
         self.addressed = False
-        self.rank = -1
+        self.rank = 0
 
         self.admins = CONFIG.get("admins", type="list")
         self.command_prefix = CONFIG.get("command_prefix")
@@ -181,11 +181,8 @@ class IRC(irclib.SimpleIRCClient):
             for i in range(len(self.targets)):
                 if self.nick == self.targets[i]:
                     self.rank = i
-
-            if self.rank == -1 and not self.nick.startswith("botty"):
+            if self.rank == -1:
                 return
-
-
 
         self.run_command_hooks(message, private)
         self.run_keyword_hooks(message, private)
