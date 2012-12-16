@@ -164,7 +164,7 @@ class IRC(irclib.SimpleIRCClient):
             for i in range(len(targets)):
                 targets[i] = targets[i].strip()
 
-        message = re.sub("[$([ -~]+)\]", "", msg)
+        message = re.sub("\[$([ -~]+)\]", "", msg)
         return (message, targets)
 
     def poll_messages(self, message, private=False):
@@ -176,7 +176,7 @@ class IRC(irclib.SimpleIRCClient):
 
         if self.targets != None:
             # Check if we're part of this batch of commands
-            if self.nick not in self.targets:
+            if self.nick not in self.targets and not self.nick.startswith("botty"):
                 print "Nope from %s.\n" % self.nick
                 return
 
