@@ -40,8 +40,8 @@ class NumericalSummarizer:
         args = combiner.split(":")
         while len(args) < 3: args.append("") 
         self.combiners.append(self.find_combiner(args[0], args[1], args[2]))
-        match_string += "(" + subs[args[0]] + ")"
         self.matches.append([])
+        match_string += "(" + subs[args[0]] + ")"
       else:
         match_string += "\s+"
 
@@ -71,13 +71,15 @@ class NumericalSummarizer:
 
   def menu(self):
     items = []
-    for i in range(len(self.matches)):
+    for i in range(len(self.combiners)):
+      if isinstance(self.combiners[i], NullCombiner): continue
       # items.append("Variable %d (%s) - %s" % (i+1, self.combiners[i].type, self.combiners[i].summary()))
       items.append("%s (%s) - %s" % (self.combiners[i].name, self.combiners[i].type, self.combiners[i].summary()))
-      
+
     interactive_list = InteractiveList(items)
     interactive_list.show_numbers = False
     interactive_list.show_pages = False
+    interactive_list.perpage = len(self.combiners)
     return Menu(Prepender(
         "%d total entries" % len(self.hosts),
         interactive_list))
