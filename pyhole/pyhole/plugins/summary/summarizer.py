@@ -153,6 +153,15 @@ class MaxCombiner(Combiner):
   def summary(self):
     return str(self.max)
 
+class ConcatCombiner(Combiner):
+  def __init__(self, name, type):
+    Combiner.__init__(self, name, type)
+    self.all = []
+  def add(self, item):
+    self.all.append(str(item))
+  def summary(self):
+    return " || ".join(self.all)
+
 class Result:
   def __init__(self, id, message):
     self.id = id
