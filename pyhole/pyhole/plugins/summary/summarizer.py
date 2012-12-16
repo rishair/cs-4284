@@ -46,8 +46,8 @@ class NumericalSummarizer:
     self.match_string = match_string
 
   def find_combiner(self, name, combiner, type):
-    if type == "s":
-      return NullCombiner(name, type)
+    if combiner == "concat":
+      return ConcatCombiner(name, type)
     elif combiner == "avg":
       return AverageCombiner(name, type)
     elif combiner == "sum":
@@ -58,6 +58,7 @@ class NumericalSummarizer:
       return MaxCombiner(name, type)
     elif combiner == "min":
       return MinCombiner(name, type)
+    return NullCombiner(name, type)
 
   def add(self, id, message):
     matches = re.search(self.match_string, message)
