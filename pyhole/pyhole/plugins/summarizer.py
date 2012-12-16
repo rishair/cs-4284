@@ -95,7 +95,6 @@ class Summarizer(plugin.Plugin):
 			elif message[0] == ".":
 				md5 = self.irc.generate_hash(nick, message)
 				self._users.add_user_hash(nick, md5)
-				self._jobs[md5] = message;
 				self.irc.normal_reply("Processing job %s" % md5)
 				self.irc.send_to_bots(channel, md5, message)
 			else:
