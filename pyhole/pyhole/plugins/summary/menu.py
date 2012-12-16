@@ -59,7 +59,6 @@ class Tester(InteractiveItem):
   def display(self):
     return "This is tester #%d, how are you?" % self.value
 
-
 class RankedList:
   def __init__(self, unique=True):
     self.ranks = {}
@@ -87,11 +86,33 @@ class RankedList:
       merged.extend(self.ranks[k])
     return merged
 
+class Prepender (InteractiveItem):
+  def __init__(self, text, interactive):
+    self.text = text
+    self.interactive = interactive
+
+  def display(self):
+    return self.text + "\n" + self.interactive.display()
+
+  def find(self, query):
+    return self.interactive.find(query)
+
+  def response(self, message):
+    return self.interactive.response(message)
+
+  def current_range(self):
+    return self.interactive.current_range()
+
+  def page_display(self):
+    return self.interactive.page_display()
+
 class InteractiveList (InteractiveItem):
   def __init__(self, l):
     self.list = l
     self.cursor = 0
     self.perpage = 3
+    self.show_pages = True
+    self.show_numbers = True
 
   def find(self, query):
     ranked = RankedList()
@@ -127,9 +148,18 @@ class InteractiveList (InteractiveItem):
     # return "(page %d of %d)\n\n" % (self.cursor / self.perpage + 1, (len(self.list) - 1) / self.perpage + 1)
 
   def display(self):
-    display = self.page_display()
+    display = ""
+    if self.show_pages:
+      display += self.page_display()
     for i in self.current_range():
-      display += str(i + 1) + ". " + self.list[i].display_short() + "\n"
+      item = self.list[i]
+      if self.show_numbers:
+        display += str(i + 1) + ". "
+      if isinstance(item, InteractiveItem):
+        display += item.display_short()
+      else:
+        display += item
+      display += "\n"
     return display
 
 

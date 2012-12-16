@@ -37,11 +37,16 @@ class Summarizer(plugin.Plugin):
 	def __init__(self, irc):
 		self._summarizers = {}
 		self._users = UserManager()
+		self._jobs = {}
 		plugin.Plugin.__init__(self, irc)
 
 	def summarizer(self, hash):
 		if hash not in self._summarizers:
-			self._summarizers[hash] = summarizer.Summarizer()
+			job = self._jobs[hash]
+			if len(job) == 1:
+				self._summarizers[hash] = summarizer.GroupedSummarizer()
+			else:
+				self._summarizers[hash] = summarizer.NumericalSummarizer(job[1].strip())
 		return self._summarizers[hash]
 
 	def summarizers(self):
@@ -79,6 +84,7 @@ class Summarizer(plugin.Plugin):
 		elif channel[0:1] == "#" and not private:
 			self.irc.normal_reply("%s: If you PM me the same command I might be able to help you summarize the results." % nick)
 		else:
+			# Parse up the job and save it, including pipes, etc.
 			sums = self.summarizers()
 
 			if message == "jobs":
@@ -90,6 +96,7 @@ class Summarizer(plugin.Plugin):
 			elif message[0] == ".":
 				md5 = self.irc.generate_hash(nick, message)
 				self._users.add_user_hash(nick, md5)
+				self._jobs[md5] = message.split("|")
 				self.irc.normal_reply("Processing job %s" % md5)
 				self.irc.send_to_bots(channel, md5, message)
 			else:
