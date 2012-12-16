@@ -181,7 +181,7 @@ class IRC(irclib.SimpleIRCClient):
             for i in range(len(self.targets)):
                 if self.nick == self.targets[i]:
                     self.rank = i
-            if self.rank == -1:
+            if self.rank == -1 or self.nick.startswith("botty"):
                 return
 
         self.run_command_hooks(message, private)

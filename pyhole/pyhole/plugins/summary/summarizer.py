@@ -54,6 +54,10 @@ class NumericalSummarizer:
       return SumCombiner(name, type)
     elif combiner == "product":
       return ProductCombiner(name, type)
+    elif combiner == "max":
+      return MaxCombiner(name, type)
+    elif combiner == "min":
+      return MinCombiner(name, type)
 
   def add(self, id, message):
     matches = re.search(self.match_string, message)
@@ -122,6 +126,32 @@ class SumCombiner(Combiner):
     self.total += float(item)
   def summary(self):
     return str(self.total)
+
+class MinCombiner(Combiner):
+  def __init__(self, name, type):
+    Combiner.__init__(self, name, type)
+    self.min = None
+  def add(self, item):
+    item = float(item)
+    if self.min == None:
+      self.min = item
+    else
+      self.min = min(item, self.min)
+  def summary(self):
+    return str(self.min)
+
+class MaxCombiner(Combiner):
+  def __init__(self, name, type):
+    Combiner.__init__(self, name, type)
+    self.max = None
+  def add(self, item):
+    item = float(item)
+    if self.max == None:
+      self.max = item
+    else
+      self.max = max(item, self.max)
+  def summary(self):
+    return str(self.max)
 
 class Result:
   def __init__(self, id, message):
