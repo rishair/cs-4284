@@ -77,7 +77,7 @@ class Summarizer(plugin.Plugin):
 				# Message from a bot
 				hash = split[0]
 				message = split[1]
-				self.summarizer(hash).add(nick, message)
+				self.summarizer(hash, message).add(nick, message)
 			else:
 				pass
 		elif channel[0:1] == "#" and not private:
