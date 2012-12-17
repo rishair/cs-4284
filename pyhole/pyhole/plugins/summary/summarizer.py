@@ -60,6 +60,8 @@ class NumericalSummarizer:
       return MaxCombiner(name, type)
     elif combiner == "min":
       return MinCombiner(name, type)
+    elif combiner == "unique":
+      return UniqueCombiner(name, type)
     return NullCombiner(name, type)
 
   def add(self, id, message):
@@ -174,6 +176,12 @@ class ConcatCombiner(Combiner):
     self.all.append(str(item))
   def summary(self):
     return " || ".join(self.all)
+
+class UniqueCombiner(ConcatCombiner):
+  def add(self, id, item):
+    item = str(item)
+    if item not in self.all:
+      self.all.append(str(item))
 
 class Result:
   def __init__(self, id, message):
