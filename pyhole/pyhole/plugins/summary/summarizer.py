@@ -67,7 +67,7 @@ class NumericalSummarizer:
     results = matches.groups()
     self.hosts.append(id)
     for i in range(len(results)):
-      self.combiners[i].add(results[i])
+      self.combiners[i].add(id, results[i])
 
   def menu(self):
     items = []
@@ -90,7 +90,7 @@ class Combiner:
       name = "var"
     self.name = name
     self.type = type
-  def add(self, item):
+  def add(self, id, item):
     pass
   def summary(self):
     return ""
@@ -103,7 +103,7 @@ class ProductCombiner(Combiner):
   def __init__(self, name, type):
     Combiner.__init__(self, name, type)
     self.total = float(1)
-  def add(self, item):
+  def add(self, id, item):
     self.total *= float(item)
   def summary(self):
     return str(self.total)
@@ -113,7 +113,7 @@ class AverageCombiner(Combiner):
     Combiner.__init__(self, name, type)
     self.total = float(0)
     self.count = 0
-  def add(self, item):
+  def add(self, id, item):
     self.total += float(item)
     self.count += 1
   def summary(self):
@@ -125,7 +125,7 @@ class SumCombiner(Combiner):
   def __init__(self, name, type):
     Combiner.__init__(self, name, type)
     self.total = float(0)
-  def add(self, item):
+  def add(self, id, item):
     self.total += float(item)
   def summary(self):
     return str(self.total)
@@ -134,33 +134,43 @@ class MinCombiner(Combiner):
   def __init__(self, name, type):
     Combiner.__init__(self, name, type)
     self.min = None
-  def add(self, item):
+    self.min_items = []
+  def add(self, id, item):
     item = float(item)
     if self.min == None:
       self.min = item
-    else:
-      self.min = min(item, self.min)
+      self.min_items = [id]
+    elif item <= self.min:
+      if item < self.min:
+        self.min_items = []
+      self.min_items.append(id)
+      self.min = item
   def summary(self):
-    return str(self.min)
+    return "*" + ", ".join(self.min_items) + "*: " + str(self.min)
 
 class MaxCombiner(Combiner):
   def __init__(self, name, type):
     Combiner.__init__(self, name, type)
     self.max = None
-  def add(self, item):
+    self.max_items = []
+  def add(self, id, item):
     item = float(item)
     if self.max == None:
       self.max = item
-    else:
-      self.max = max(item, self.max)
+      self.max_items = [id]
+    elif item >= self.max:
+      if item > self.max:
+        self.max_items = []
+      self.max_items.append(id)
+      self.max = item
   def summary(self):
-    return str(self.max)
+    return "*" + ", ".join(self.min_items) + "*: " + str(self.min)
 
 class ConcatCombiner(Combiner):
   def __init__(self, name, type):
     Combiner.__init__(self, name, type)
     self.all = []
-  def add(self, item):
+  def add(self, id, item):
     self.all.append(str(item))
   def summary(self):
     return " || ".join(self.all)
