@@ -25,7 +25,7 @@ class NumericalSummarizer:
   def __init__(self, match_string):
     subs = {
       "s": "\S+",
-      "n": "[0-9.]+"
+      "n": "[0-9.-]+"
     }
     self.hosts = []
     self.matches = []
