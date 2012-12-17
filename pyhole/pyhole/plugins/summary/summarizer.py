@@ -148,7 +148,7 @@ class MinCombiner(Combiner):
       self.min_items.append(id)
       self.min = item
   def summary(self):
-    return "*" + ", ".join(self.min_items) + "*: " + str(self.min)
+    return  str(self.min) + " (" + ", ".join(self.min_items) + ")"
 
 class MaxCombiner(Combiner):
   def __init__(self, name, type):
@@ -166,7 +166,7 @@ class MaxCombiner(Combiner):
       self.max_items.append(id)
       self.max = item
   def summary(self):
-    return "*" + ", ".join(self.max_items) + "*: " + str(self.max)
+    return  str(self.max) + " (" + ", ".join(self.max_items) + ")"
 
 class ConcatCombiner(Combiner):
   def __init__(self, name, type):
