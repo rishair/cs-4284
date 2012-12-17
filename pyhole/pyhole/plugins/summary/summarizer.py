@@ -166,7 +166,7 @@ class MaxCombiner(Combiner):
       self.max_items.append(id)
       self.max = item
   def summary(self):
-    return "*" + ", ".join(self.max_combiner) + "*: " + str(self.max)
+    return "*" + ", ".join(self.max_items) + "*: " + str(self.max)
 
 class ConcatCombiner(Combiner):
   def __init__(self, name, type):
