@@ -110,7 +110,7 @@ class InteractiveList (InteractiveItem):
   def __init__(self, l):
     self.list = l
     self.cursor = 0
-    self.perpage = 3
+    self.perpage = 8
     self.show_pages = True
     self.show_numbers = True
 
