@@ -177,11 +177,16 @@ class ConcatCombiner(Combiner):
   def summary(self):
     return " || ".join(self.all)
 
-class UniqueCombiner(ConcatCombiner):
+class UniqueCombiner(Combiner):
+  def __init__(self, name, type):
+    Combiner.__init__(self, name, type)
+    self.all = []
   def add(self, id, item):
     item = str(item)
     if item not in self.all:
-      self.all.append(str(item))
+      self.all.append(item)
+  def summary(self):
+    return " || ".join(self.all)
 
 class Result:
   def __init__(self, id, message):
