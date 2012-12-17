@@ -156,6 +156,7 @@ class InteractiveList (InteractiveItem):
         display += item.display_short()
       else:
         display += item
+      display += "\n"
     if self.show_pages: display += "\n" + self.page_display()
     return display
 
