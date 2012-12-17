@@ -144,22 +144,19 @@ class InteractiveList (InteractiveItem):
     return range(self.cursor, self.cursor + min(self.perpage, len(self.list) - self.cursor))
 
   def page_display(self):
-    return "(%d of %d)\n\n" % (self.cursor + 1, len(self.list))
+    return "(%d of %d, enter prev or next to navigate)" % (self.cursor + 1, len(self.list))
     # return "(page %d of %d)\n\n" % (self.cursor / self.perpage + 1, (len(self.list) - 1) / self.perpage + 1)
 
   def display(self):
     display = ""
-    if self.show_pages:
-      display += self.page_display()
     for i in self.current_range():
       item = self.list[i]
-      if self.show_numbers:
-        display += str(i + 1) + ". "
+      if self.show_numbers: display += str(i + 1) + ". "
       if isinstance(item, InteractiveItem):
         display += item.display_short()
       else:
-        display += item
-      display += "\n"
+        display += ite
+    if self.show_pages: display += "\n" + self.page_display()
     return display
 
 

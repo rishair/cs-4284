@@ -90,10 +90,8 @@ class Combiner:
       name = "var"
     self.name = name
     self.type = type
-
   def add(self, item):
     pass
-
   def summary(self):
     return ""
 
@@ -199,23 +197,18 @@ class ResultSet (InteractiveItem):
     return high
 
   def display_short(self):
-    summary = ""
-    space = " " * len(summary)
-    # Add the "Message" line
-    summary += "Message: "
-    if len(self.message) > self.MAX_SUMMARY_LENGTH:
-      summary += "%s...\n" % self.message[0:self.MAX_SUMMARY_LENGTH]
-    else:
-      summary += "%s\n" % self.message 
-    # Add the "Servers" line
-    summary += "%sServers: " % space
     servers_len = len(self.items)
+    summary = "*"
     for key in range(min(servers_len, self.MAX_SERVERS_SUMMARY)):
       summary += self.items[key].id + ", "
     summary = summary[0:-2]
     if servers_len > self.MAX_SERVERS_SUMMARY:
       summary += " (and %d more..)" % (servers_len - self.MAX_SERVERS_SUMMARY)
-    summary += "\n"
+    summary += "*\n"
+    if len(self.message) > self.MAX_SUMMARY_LENGTH:
+      summary += "%s...\n" % self.message[0:self.MAX_SUMMARY_LENGTH]
+    else:
+      summary += "%s\n" % self.message
     return summary
 
   def display(self):
