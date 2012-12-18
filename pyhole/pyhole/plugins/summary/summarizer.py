@@ -322,7 +322,10 @@ class DistributionCombiner(Combiner):
     steps = 10
     increment = (self.all[-1] - self.all[0]) / float(steps)
     if increment == 0: return "Unavailable"
-    d = str(max(0, int(math.floor(abs(math.log(abs(increment), steps))))))
+    log = math.log(abs(increment), steps)
+    d = str(0)
+    if log < 0:
+      d = str(int(math.floor(abs(log)+1)))
     for i in range(0, steps):
       sliced = self.slice(i / float(steps))
       ranges.append([("%." + d + "f-%." + d + "f") % (sliced, sliced + increment), 0])

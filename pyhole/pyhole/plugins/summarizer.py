@@ -4,6 +4,7 @@ import commands
 import socket
 import random
 import re
+import exceptions
 
 from pyhole import irc
 from pyhole import plugin
@@ -44,6 +45,7 @@ class Summarizer(plugin.Plugin):
 		self._summarizers = {}
 		self._users = UserManager()
 		self._jobs = {}
+		self._targeted_bots = {}
 		plugin.Plugin.__init__(self, irc)
 
 	def summarizer(self, hash):
@@ -60,6 +62,11 @@ class Summarizer(plugin.Plugin):
 	def summarizers(self):
 		return self._summarizers.keys()
 
+	def names(self, channel):
+		if channel in self.irc.names:
+			return self.irc.names[channel]
+		return []
+
 	def num_bots(self, channel):
 		i = 0
 		if channel in self.irc.names:
@@ -67,6 +74,24 @@ class Summarizer(plugin.Plugin):
 				if re.match("^bot([0-9]+)*$", name):
 					i += 1
 		return i
+
+	def expand_bots(self, message, bots):
+	  match = re.search("\[([ -~]+)\]", message)
+	  all_targets = []
+	  if match:
+	    all_targets = []
+	    targets = match.group(1).split(",")
+	    for i in range(len(targets)):
+	      target = targets[i].strip()
+	      try:
+	        target.index("*")
+	        target = "^" + re.escape(target).replace("\\*", ".*") + "$"
+	        for bot in bots:
+	          if re.match(target, bot):
+	            all_targets.append(bot)
+	      except exceptions.ValueError:
+	        all_targets.append(target)
+	  return (len(all_targets), re.sub("\[([ -~]+)\]", "[%s]" % ", ".join(all_targets), message))
 
 	@plugin.hook_add_msg_regex(".")
 	def bot_command(self, params=None, **kwargs):
@@ -98,7 +123,9 @@ class Summarizer(plugin.Plugin):
 				message = split[1]
 				summy = self.summarizer(hash)
 				summy.add(nick, message)
-				if self.num_bots(broadcast_channel) == summy.count:
+				targeted_bots = self._targeted_bots[hash]
+				if (targeted_bots > 0 and targeted_bots == summy.count) \
+					or (self.num_bots(broadcast_channel) == summy.count):
 					self.irc.target = self._users.user_from_hash(hash)
 					self.irc.source = self.irc.target + "!" + self.irc.target
 					self.bot_command(full_message="show", private=True)
@@ -121,6 +148,9 @@ class Summarizer(plugin.Plugin):
 				self._users.add_user_hash(nick, md5)
 				self._jobs[md5] = message.split("|")
 				self.irc.normal_reply("Processing job %s" % md5)
+				bots = self.names(broadcast_channel)
+				bots.remove("botty")
+				(self._targeted_bots[md5], message) = self.expand_bots(message, bots)
 				self.irc.send_to_bots(channel, md5, message)
 				self.irc.request_names([channel])
 			else:

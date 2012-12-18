@@ -20,6 +20,7 @@ import re
 import sys
 import time
 import urllib
+import exceptions
 
 import irclib
 import log
@@ -165,7 +166,6 @@ class IRC(irclib.SimpleIRCClient):
             targets = match.group(1).split(",")
             for i in range(len(targets)):
                 targets[i] = targets[i].strip()
-
         message = re.sub("\[$([ -~]+)\]", "", msg)
         return (message, targets)
 
