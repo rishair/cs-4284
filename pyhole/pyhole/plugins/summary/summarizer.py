@@ -263,7 +263,7 @@ class UniqueCombiner(ProducerCombiner):
   def out(self):
     return self.all
 
-class SortCombiner(Combiner):
+class SortCombiner(ProducerCombiner):
   def __init__(self, type, params):
     Combiner.__init__(self, type, params)
     self.all = []
