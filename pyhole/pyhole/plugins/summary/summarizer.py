@@ -29,6 +29,7 @@ class NumericalSummarizer:
       "s": "\S+",
       "n": "[0-9.-]+"
     }
+    self.count = 0
     self.hosts = []
     self.matches = []
     self.combiners = []
@@ -89,6 +90,7 @@ class NumericalSummarizer:
     matches = re.search(self.match_string, message)
     results = matches.groups()
     self.hosts.append(id)
+    self.count += 1
     for i in range(len(results)):
       self.combiners[i].add(id, results[i])
 
@@ -97,7 +99,6 @@ class NumericalSummarizer:
     for i in range(len(self.combiners)):
       if isinstance(self.combiners[i], NullCombiner): continue
       self.combiners[i].propogate_output()
-      # items.append("Variable %d (%s) - %s" % (i+1, self.combiners[i].type, self.combiners[i].summary()))
       items.append("%s (%s): %s" % ("var " + str(i), self.combiners[i].type, self.combiners[i].final_summary()))
 
     interactive_list = InteractiveList(items)

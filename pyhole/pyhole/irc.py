@@ -47,6 +47,7 @@ class IRC(irclib.SimpleIRCClient):
         self.target = None
         self.addressed = False
         self.rank = 0
+        self.names = {}
 
         self.admins = CONFIG.get("admins", type="list")
         self.command_prefix = CONFIG.get("command_prefix")
@@ -241,6 +242,9 @@ class IRC(irclib.SimpleIRCClient):
 
     def send_to_bots(self, channel, hash, msg):
         self.connection.privmsg("#" + channel.strip("#"), "%s $%s$" % (msg, hash))
+
+    def request_names(self, channels=None):
+        self.connection.names(channels)
 
     def reply(self, msg):
         """Send a privmsg. If the generating event was in channel #test, respond
@@ -449,6 +453,9 @@ class IRC(irclib.SimpleIRCClient):
         self.log.info(unicode("-%s- <%s> %s" % (self.target, nick, msg),
                 "utf-8"))
         self.poll_messages(msg)
+
+    def on_namreply(self, _connection, event):
+        self.names[event.arguments()[1]] = event.arguments()[2].strip().split(" ")
 
 
 class IRCProcess(multiprocessing.Process):
