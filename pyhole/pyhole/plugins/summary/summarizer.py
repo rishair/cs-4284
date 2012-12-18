@@ -27,13 +27,15 @@ class NumericalSummarizer:
   def __init__(self, match_string):
     subs = {
       "s": "\S+",
-      "n": "[0-9.-]+"
+      "n": "[0-9.-]+",
+      "*": ".+",
+      "?": ".+?",
     }
     self.count = 0
     self.hosts = []
     self.matches = []
     self.combiners = []
-    matches = re.findall("(<([A-Za-z0-9._\\+:-]+)>|\s+|[^<]+)", match_string)
+    matches = re.findall("(<([^>]+)>|\s+|[^<]+)", match_string)
     match_string = ""
     i = 1
     for match in matches:
@@ -61,6 +63,7 @@ class NumericalSummarizer:
           match_string += "\s+"
         else:
           match_string += re.escape(match[0])
+    print match_string
     self.match_string = match_string
 
   def find_combiner(self, type, combiner):

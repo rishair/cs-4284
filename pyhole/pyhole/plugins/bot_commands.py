@@ -26,3 +26,10 @@ class BotCommands(plugin.Plugin):
     @plugin.hook_add_command("loadavg")
     def loadavg(self, params=None, **kwargs):
 		self.irc.reply("%f %f %f" % os.getloadavg())
+
+	@plugin.hook_add_command("thanks")
+	def thanks(self, params=None, **kwargs):
+		if self.rank >= 0:
+			words = ["Thanks for listening :)"].split(" ")
+			word = words[self.rank % len(words)]
+			self.irc.reply("%s" % word)
