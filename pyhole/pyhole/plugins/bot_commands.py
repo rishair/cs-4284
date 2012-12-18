@@ -25,4 +25,4 @@ class BotCommands(plugin.Plugin):
 
     @plugin.hook_add_command("loadavg")
     def loadavg(self, params=None, **kwargs):
-		self.irc.reply("%f %f %f", os.getloadavg())
+		self.irc.reply("%f %f %f" % os.getloadavg())
