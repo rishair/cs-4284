@@ -21,7 +21,7 @@ class BotCommands(plugin.Plugin):
 
     @plugin.hook_add_command("rank")
     def rank(self, params=None, **kwargs):
-        self.irc.reply("%d %d" % (self.irc.rank, random.randint(0, 100)))
+        self.irc.reply("Rank: %d, Random: %d" % (self.irc.rank, random.randint(0, 100)))
 
     @plugin.hook_add_command("loadavg")
     def loadavg(self, params=None, **kwargs):
