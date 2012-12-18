@@ -30,6 +30,6 @@ class BotCommands(plugin.Plugin):
 	@plugin.hook_add_command("thanks")
 	def thanks(self, params=None, **kwargs):
 		if self.irc.rank >= 0:
-			words = ["Thanks for listening :)"].split(" ")
-			word = words[self.rank % len(words)]
+			words = "Thanks for listening :)".split(" ")
+			word = words[self.irc.rank % len(words)]
 			self.irc.reply("%s" % word)
