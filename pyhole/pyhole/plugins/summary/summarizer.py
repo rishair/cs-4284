@@ -98,7 +98,7 @@ class NumericalSummarizer:
       if isinstance(self.combiners[i], NullCombiner): continue
       self.combiners[i].propogate_output()
       # items.append("Variable %d (%s) - %s" % (i+1, self.combiners[i].type, self.combiners[i].summary()))
-      items.append("%s (%s): %s" % ("var", self.combiners[i].type, self.combiners[i].final_summary()))
+      items.append("%s (%s): %s" % ("var " + str(i), self.combiners[i].type, self.combiners[i].final_summary()))
 
     interactive_list = InteractiveList(items)
     interactive_list.show_numbers = False
@@ -288,6 +288,7 @@ class DistributionCombiner(Combiner):
     self.all = []
     self.total = 0
     self.sqtotal = 0
+
   def add(self, id, item):
     item = float(item)
     self.total += item
@@ -320,7 +321,7 @@ class DistributionCombiner(Combiner):
     steps = 10
     increment = (self.all[-1] - self.all[0]) / float(steps)
     if increment == 0: return "Unavailable"
-    d = str(max(0, int(math.floor(abs(math.log(abs(increment), steps))))-1))
+    d = str(max(0, int(math.floor(abs(math.log(abs(increment), steps))))))
     for i in range(0, steps):
       sliced = self.slice(i / float(steps))
       ranges.append([("%." + d + "f-%." + d + "f") % (sliced, sliced + increment), 0])
