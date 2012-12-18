@@ -1,6 +1,8 @@
 
 import hashlib
 import re
+import exceptions
+import math
 from menu import *
 
 def hash(string):
@@ -30,7 +32,7 @@ class NumericalSummarizer:
     self.hosts = []
     self.matches = []
     self.combiners = []
-    matches = re.findall("(<([A-Za-z0-9._\\+:-]+)>|\s+)", match_string)
+    matches = re.findall("(<([A-Za-z0-9._\\+:-]+)>|\s+|[^<]+)", match_string)
     match_string = ""
     i = 1
     for match in matches:
@@ -38,31 +40,50 @@ class NumericalSummarizer:
       if len(combiner) > 0:
         # We're dealing with a <combiner>
         args = combiner.split(":")
-        while len(args) < 3: args.append("") 
-        self.combiners.append(self.find_combiner(args[0], args[1], args[2]))
+        while len(args) < 2: args.append("")
+        first = self.find_combiner(args[0], args[1])
+        first = None
+        last = None
+        for i in range(1, len(args)):
+          item = self.find_combiner(args[0], args[i])
+          if first == None:
+            first = item
+            last = item
+          else:
+            last.output = item
+            last = item
+        self.combiners.append(first)
         self.matches.append([])
         match_string += "(" + subs[args[0]] + ")"
       else:
-        match_string += "\s+"
-
+        if re.match("\s+", match[0]):
+          match_string += "\s+"
+        else:
+          match_string += re.escape(match[0])
     self.match_string = match_string
 
-  def find_combiner(self, type, combiner, name):
-    if combiner == "concat":
-      return ConcatCombiner(name, type)
-    elif combiner == "avg":
-      return AverageCombiner(name, type)
-    elif combiner == "sum":
-      return SumCombiner(name, type)
-    elif combiner == "product":
-      return ProductCombiner(name, type)
-    elif combiner == "max":
-      return MaxCombiner(name, type)
-    elif combiner == "min":
-      return MinCombiner(name, type)
-    elif combiner == "unique":
-      return UniqueCombiner(name, type)
-    return NullCombiner(name, type)
+  def find_combiner(self, type, combiner):
+    combiner_parts = combiner.split(",")
+    combiner_name = combiner_parts[0]
+    combiner_params = combiner_parts[1:]
+
+    combiners = {
+      "average":      AverageCombiner,
+      "avg":          AverageCombiner,
+      "concat":       ConcatCombiner,
+      "dist":         DistributionCombiner,
+      "distribution": DistributionCombiner,
+      "max":          MaxCombiner,
+      "maximum":      MaxCombiner,
+      "min":          MinCombiner,
+      "minimum":      MinCombiner,
+      "sort":         SortCombiner,
+      "sum":          SumCombiner,
+      "unique":       UniqueCombiner,
+    }
+    if combiner_name in combiners:
+      return combiners[combiner_name](type, combiner_params)
+    return NullCombiner(type, combiner_params)
 
   def add(self, id, message):
     matches = re.search(self.match_string, message)
@@ -75,8 +96,9 @@ class NumericalSummarizer:
     items = []
     for i in range(len(self.combiners)):
       if isinstance(self.combiners[i], NullCombiner): continue
+      self.combiners[i].propogate_output()
       # items.append("Variable %d (%s) - %s" % (i+1, self.combiners[i].type, self.combiners[i].summary()))
-      items.append("%s (%s) - %s" % (self.combiners[i].name, self.combiners[i].type, self.combiners[i].summary()))
+      items.append("%s (%s): %s" % ("var", self.combiners[i].type, self.combiners[i].final_summary()))
 
     interactive_list = InteractiveList(items)
     interactive_list.show_numbers = False
@@ -87,32 +109,60 @@ class NumericalSummarizer:
         interactive_list))
 
 class Combiner:
-  def __init__(self, name, type):
-    if len(name) == 0:
-      name = "var"
-    self.name = name
+  def __init__(self, type, params):
     self.type = type
+    self.output = None
+    self.params = params
   def add(self, id, item):
     pass
+  def join(self, items, joiner = " | "):
+    return joiner.join(map(str, items))
   def summary(self):
     return ""
+  def output_error(self):
+    if not isinstance(self.output, Combiner):
+      return "%s is not a valid combiner" % self.output.__class__.__name__ 
+    if not isinstance(self, ProducerCombiner):
+      return "%s is not a valid output combiner" % self.__class__.__name__
+  def propogate_output(self):
+    error = self.output_error()
+    if self.output == None or error != None:
+      return False
+    out = self.out()
+    for item in out:
+      self.output.add("id", item)
+    return True
+  def final_summary(self):
+    error = self.output_error()
+    if self.output != None:
+      if error == None:
+        return self.output.final_summary()
+      else:
+        return error
+    return self.summary()
 
-class NullCombiner(Combiner):
+class ProducerCombiner(Combiner):
+  def out(self):
+    return []
+
+class NullCombiner(ProducerCombiner):
   def summary(self):
     return "String"
 
-class ProductCombiner(Combiner):
-  def __init__(self, name, type):
-    Combiner.__init__(self, name, type)
+class ProductCombiner(ProducerCombiner):
+  def __init__(self, type, params):
+    Combiner.__init__(self, type, params)
     self.total = float(1)
   def add(self, id, item):
     self.total *= float(item)
   def summary(self):
     return str(self.total)
+  def out(self):
+    return self.total
 
-class AverageCombiner(Combiner):
-  def __init__(self, name, type):
-    Combiner.__init__(self, name, type)
+class AverageCombiner(ProducerCombiner):
+  def __init__(self, type, params):
+    Combiner.__init__(self, type, params)
     self.total = float(0)
     self.count = 0
   def add(self, id, item):
@@ -122,19 +172,24 @@ class AverageCombiner(Combiner):
     if self.count == 0:
       return "No items"
     return str(self.total / self.count)
+  def out(self):
+    if self.count == 0: return 0
+    return self.total / self.count
 
-class SumCombiner(Combiner):
-  def __init__(self, name, type):
-    Combiner.__init__(self, name, type)
+class SumCombiner(ProducerCombiner):
+  def __init__(self, type, params):
+    Combiner.__init__(self, type, params)
     self.total = float(0)
   def add(self, id, item):
     self.total += float(item)
   def summary(self):
     return str(self.total)
+  def out(self):
+    return self.total
 
-class MinCombiner(Combiner):
-  def __init__(self, name, type):
-    Combiner.__init__(self, name, type)
+class MinCombiner(ProducerCombiner):
+  def __init__(self, type, params):
+    Combiner.__init__(self, type, params)
     self.min = None
     self.min_items = []
   def add(self, id, item):
@@ -148,11 +203,13 @@ class MinCombiner(Combiner):
       self.min_items.append(id)
       self.min = item
   def summary(self):
-    return  str(self.min) + " (" + ", ".join(self.min_items) + ")"
+    return str(self.min) + " (" + ", ".join(self.min_items) + ")"
+  def out(self):
+    return self.min
 
-class MaxCombiner(Combiner):
-  def __init__(self, name, type):
-    Combiner.__init__(self, name, type)
+class MaxCombiner(ProducerCombiner):
+  def __init__(self, type, params):
+    Combiner.__init__(self, type, params)
     self.max = None
     self.max_items = []
   def add(self, id, item):
@@ -167,26 +224,139 @@ class MaxCombiner(Combiner):
       self.max = item
   def summary(self):
     return  str(self.max) + " (" + ", ".join(self.max_items) + ")"
+  def out(self):
+    return self.max
 
-class ConcatCombiner(Combiner):
-  def __init__(self, name, type):
-    Combiner.__init__(self, name, type)
+class ConcatCombiner(ProducerCombiner):
+  def __init__(self, type, params):
+    Combiner.__init__(self, type, params)
     self.all = []
   def add(self, id, item):
     self.all.append(str(item))
   def summary(self):
-    return " || ".join(self.all)
+    return self.join(self.all)
+  def out(self):
+    return self.all
 
-class UniqueCombiner(Combiner):
-  def __init__(self, name, type):
-    Combiner.__init__(self, name, type)
+class CountCombiner(ProducerCombiner):
+  def __init__(self, type, params):
+    Combiner.__init__(self, type, params)
+    self.count = 0
+  def add(self, id, item):
+    self.count += 1
+  def summary(self):
+    return str(self.count)
+  def out(self):
+    return self.count
+
+class UniqueCombiner(ProducerCombiner):
+  def __init__(self, type, params):
+    Combiner.__init__(self, type, params)
     self.all = []
   def add(self, id, item):
     item = str(item)
     if item not in self.all:
       self.all.append(item)
   def summary(self):
-    return " || ".join(self.all)
+    return self.join(self.all)
+  def out(self):
+    return self.all
+
+class SortCombiner(Combiner):
+  def __init__(self, type, params):
+    Combiner.__init__(self, type, params)
+    self.all = []
+  def add(self, id, item):
+    try:
+      item = float(item)
+    except exceptions.ValueError:
+      pass
+    for i in range(len(self.all)):
+      if item < self.all[i]:
+        self.all.insert(i, item)
+        return
+    self.all.append(item)
+  def summary(self):
+    return self.join(self.all)
+  def out(self):
+    return self.all
+
+
+class DistributionCombiner(Combiner):
+  def __init__(self, type, params):
+    Combiner.__init__(self, type, params)
+    self.all = []
+    self.total = 0
+    self.sqtotal = 0
+  def add(self, id, item):
+    item = float(item)
+    self.total += item
+    self.sqtotal += item*item
+    for i in range(len(self.all)):
+      if item < self.all[i]:
+        self.all.insert(i, item)
+        return
+    self.all.append(item)
+
+  def percentile(self, percent):
+    index = percent * len(self.all)
+    if percent == 1:
+      index -= 1
+    if int(index) == index:
+      return self.all[int(index)]
+    else:
+      prev = float(self.all[int(index)])
+      next = float(self.all[min(len(self.all) - 1, int(index) + 1)])
+      return (prev + next) / 2 + (next - prev) * (index % 1)
+
+  def slice(self, percent):
+    return self.all[0] + (self.all[-1] - self.all[0]) * percent
+
+  def find_slice(self, val):
+    return (val - self.all[-1]) / (self.all[0] - self.all[-1])
+
+  def google_link(self):
+    ranges = []
+    steps = 10
+    increment = (self.all[-1] - self.all[0]) / float(steps)
+    if increment == 0: return "Unavailable"
+    d = str(max(0, int(math.floor(abs(math.log(abs(increment), steps))))-1))
+    for i in range(0, steps):
+      sliced = self.slice(i / float(steps))
+      ranges.append([("%." + d + "f-%." + d + "f") % (sliced, sliced + increment), 0])
+    for item in self.all:
+      sliced = self.find_slice(item)
+      index = int(sliced * steps)
+      if sliced == 1:
+        index -= 1
+      ranges[index][1] += 1
+
+    url = "http://chart.apis.google.com/chart?cht=bvg&chs=600x300&chxt=x,y&chbh=a,0,1&chco=4D89F9&chds=a&"
+    url += "chd=t:" + ",".join(map(lambda x: str(x[1]), ranges)) + "&"
+    url += "chxl=0:|" + "|".join(map(lambda x: x[0], ranges)) + "&"
+    url += "chtt=Distribution+of+%d+entries" % len(self.all)
+    return url
+
+  def summary(self):
+    percentiles = [
+      ("# of Items",             len(self.all)),
+      (" > Highest",          self.percentile(1)),
+      (" > 90th percentile",  self.percentile(.9)),
+      (" > 75th percentile",  self.percentile(.75)),
+      (" > 50th percentile",  self.percentile(.50)),
+      (" > 25th percentile",  self.percentile(.25)),
+      (" > 10th percentile",  self.percentile(.1)),
+      (" > Lowest",           self.percentile(0)),
+      (" > Mean",             self.total / len(self.all)),
+      (" > Variance",         self.sqtotal / len(self.all)),
+      (" > Std Deviation",    math.sqrt(self.sqtotal / len(self.all))),
+      (" > Histogram",        self.google_link()),
+    ]
+    string = ""
+    for item in percentiles:
+      string += item[0] + ": " + str(item[1]) + "\n"
+    return string
+
 
 class Result:
   def __init__(self, id, message):

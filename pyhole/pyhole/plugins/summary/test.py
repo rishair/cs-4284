@@ -1,12 +1,12 @@
 import sys
 from summarizer import *
 from menu import *
+import random
 
-summarizer = GroupedSummarizer()
+summarizer = NumericalSummarizer("<n:dist>, <s:sort>")
 
-summarizer.add("test", "Hostname: vt08, IPv4: 198.61.172.30")
-summarizer.add("test", "Hostnamae: vt08, IPv4: 198.61.172.30")
-summarizer.add("test", "Hostname: vt08, IPv4: 198.61.172.30")
+for i in range(71):
+	summarizer.add("test", "%d, vt%d" % (random.randint(0, 100), random.randint(0, 1000)))
 
 menu = summarizer.menu()
 print menu.display()
