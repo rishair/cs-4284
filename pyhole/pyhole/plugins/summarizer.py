@@ -64,7 +64,7 @@ class Summarizer(plugin.Plugin):
 		i = 0
 		if channel in self.irc.names:
 			for name in self.irc.names[channel]:
-				if re.match("bot([0-9]+)*", name):
+				if re.match("^bot([0-9]+)*$", name):
 					i += 1
 		return i
 
