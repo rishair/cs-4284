@@ -1,9 +1,9 @@
 
-import hashlib
-import re
-import exceptions
-import math
 from menu import *
+import exceptions
+import hashlib
+import math
+import re
 
 def hash(string):
   return hashlib.md5(string).hexdigest()
@@ -412,7 +412,4 @@ class ResultSet (InteractiveItem):
       summary += " * %s\n" % (result.id)
     summary += "\n"
     return summary
-
-
-
 
