@@ -72,6 +72,7 @@ class NumericalSummarizer:
       "average":      AverageCombiner,
       "avg":          AverageCombiner,
       "concat":       ConcatCombiner,
+      "count":        CountCombiner,
       "dist":         DistributionCombiner,
       "distribution": DistributionCombiner,
       "max":          MaxCombiner,
